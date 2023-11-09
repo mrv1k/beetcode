@@ -2,15 +2,11 @@ class Solution:
     def twoSum(self, nums, target: int):
         d = {}
         for i, num in enumerate(nums):
-            second_num = target - num
-            d[num] = second_num
-            if (second_num in d):
-                second_num_i = nums.index(second_num)
-                # disallow num reuse
-                if (i != second_num_i):
-                    return [i, second_num_i]
-
-        print('done')
+            diff = target - num
+            if diff in d:
+                second_num_i = nums.index(diff)
+                return [i, second_num_i]
+            d[num] = diff
 
 
 sol = Solution()
