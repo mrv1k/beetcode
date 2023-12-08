@@ -66,10 +66,10 @@ input1dup = [
 
 
 def day4part2():
-    # with open('./input/4.txt', 'r') as file:
-    file = input1dup
+    file = open('./input/4.txt', 'r')
+    file = file.readlines()
+
     total = [1] * len(file)
-    sum = 0
     for i, line in enumerate(file):
         numbers = line.split(': ')[1]  # throw Card N: away
         elf_numbers, winning_numbers = numbers.split(' | ')
@@ -78,7 +78,13 @@ def day4part2():
         elf_winning_numbers = list(
             set(elf_numbers).intersection(winning_numbers))
 
-    return sum
+        win_len = len(elf_winning_numbers)
+        if win_len:
+            start = i + 1
+            end_inclusive = start + win_len
+            for j in range(start, end_inclusive):
+                total[j] += total[i]
+    print(sum(total))
 
 
 print(day4part2())
