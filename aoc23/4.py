@@ -83,6 +83,7 @@ def day4part2():
             start = i + 1
             end_inclusive = start + win_len
             for j in range(start, end_inclusive):
+                # j = future card number, i = previous 
                 total[j] += total[i]
     print(sum(total))
 
