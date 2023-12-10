@@ -89,39 +89,43 @@ def day5part2():
                 maps[title].append((source, destination))
 
         print(seeds)
-        min_seed = float('inf')
-        queue = Queue()
-        for i, pair_of_seeds in enumerate(seeds):
-            # queue.put(1) queue.get()
-            path = pair_of_seeds
-            print(pair_of_seeds)
-            for map_key in maps:
-                for map_value in maps[map_key]:
-                    source, destination = map_value
-                    source_start, source_end = source
-                    destination_start, destination_end = destination
+        seeds=[seeds[1]]
+        for initia_pair_of_seeds in seeds:
+            temp_seeds = [initia_pair_of_seeds]
+            while len(temp_seeds):
+                print(temp_seeds)
+                for map_key, map_values in maps.items():
+                    cur_seed = temp_seeds.pop()
+                    for row in map_values:
+                        source, destination = row
+                        ss, se = source
+                        destination_start, destination_end = destination
 
-                    inner_join = path[0] >= source_start and path[1] <= source_end
-                    left_join = path[0] >= source_start and path[1] >= source_end
-                    right_join = path[0] >= source_start and path[1] <= source_end
-                    full_join = path[0] <= source_start and path[1] >= source_end
-                    print(path[0], path[1], source_start,  source_end)
-                    print('in', inner_join, '| left', left_join,
-                          '| right', right_join, '| full', full_join)
-                    print(map_key, map_value)
-
-                    if inner_join:
+                        left = cur_seed[0] <= ss and cur_seed[1] >= ss
+                        right = cur_seed[0] <= se and cur_seed[1] >= se
+                        inner = cur_seed[0] >= ss and cur_seed[1] <= se
+                        # print(cur_seed[0], ss, cur_seed[1], se, cur_seed[1], ss)
+                        print(map_key, cur_seed, source)
+                        print('inside', inner, '| left', left, '| right', right)
                         print()
-                        # dts = destination_end - source_end
-                        # after = path + dts
-                        # print(path, '+', dts, '=', after)
-                        # path = after
-                        # found a path, break out of this map
-                        break
-            min_seed = min(min_seed, path)
-            return min_seed
+
+                        if left:
+                            print('left slice')
+                        elif right:
+                            print('right slice')
+                        elif inner:
+                            dts = destination_end - se
+                            after_seed = (cur_seed[0] + dts, cur_seed[1] + dts)
+                            print(cur_seed, '+', dts, '=', after_seed)
+                            temp_seeds.append(after_seed)
+                        else:
+                            print('else')
+                            temp_seeds.append(cur_seed)
+                            break
+            # min_seed = min(min_seed, path)
+            # return min_seed
             # print('final path', path)
-        return min_seed
+        return 0
 
 
 print(day5part2())
