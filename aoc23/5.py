@@ -91,11 +91,12 @@ def day5part2():
         print(seeds)
         seeds=[seeds[1]]
         for initia_pair_of_seeds in seeds:
-            temp_seeds = [initia_pair_of_seeds]
-            while len(temp_seeds):
-                print(temp_seeds)
+            seeds_to_go_now = [initia_pair_of_seeds]
+            seeds_to_go_later = []
+            while len(seeds_to_go_now):
+                print('now', seeds_to_go_now)
+                cur_seed = seeds_to_go_now.pop()
                 for map_key, map_values in maps.items():
-                    cur_seed = temp_seeds.pop()
                     for row in map_values:
                         source, destination = row
                         ss, se = source
@@ -106,22 +107,37 @@ def day5part2():
                         inner = cur_seed[0] >= ss and cur_seed[1] <= se
                         # print(cur_seed[0], ss, cur_seed[1], se, cur_seed[1], ss)
                         print(map_key, cur_seed, source)
-                        print('inside', inner, '| left', left, '| right', right)
-                        print()
+                        # print('inside', inner, '| left', left, '| right', right)
+                        # print()
 
+                        dts = destination_end - se
                         if left:
+                            # seeds_to_go_later.append()
                             print('left slice')
+                            break
                         elif right:
-                            print('right slice')
+                            inside_part = (cur_seed[0] + dts, se + dts)
+                            # before = (cur_seed[0], se)
+                            # print(before, '+', dts, '=', inside_part)
+                            seeds_to_go_later.append(inside_part)
+                            outside_part = (se + 1, cur_seed[1])
+                            seeds_to_go_later.append(outside_part)
+                            print('right slice inside', inside_part)
+                            print('right slice outside', outside_part)
+                            break
                         elif inner:
-                            dts = destination_end - se
                             after_seed = (cur_seed[0] + dts, cur_seed[1] + dts)
                             print(cur_seed, '+', dts, '=', after_seed)
-                            temp_seeds.append(after_seed)
-                        else:
-                            print('else')
-                            temp_seeds.append(cur_seed)
+                            seeds_to_go_later.append(after_seed)
                             break
+                        # else:
+                        #     print('else')
+                    if len(seeds_to_go_later) == 0:
+                        seeds_to_go_later.append(cur_seed)
+                    print('later', seeds_to_go_later)
+                    print()
+                    seeds_to_go_now = seeds_to_go_later
+                return
             # min_seed = min(min_seed, path)
             # return min_seed
             # print('final path', path)
