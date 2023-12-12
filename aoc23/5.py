@@ -63,7 +63,6 @@ def day5part2():
             seed_step = seeds[i + 1]
             sweet_milky.append((seed_start, seed_start + seed_step))
         seeds = sweet_milky
-        # print(sweet_milky)
 
         # skip seed new line
         seed_line = f.readline()
@@ -82,55 +81,45 @@ def day5part2():
                 line_split = list(map(lambda s: int(s), line_split))
                 # if start 50, 98, 2 end 51, 99. so 50 -> 98, 51 -> 99, etc
                 destination_start, source_start, range_len = line_split
-                range_len -= 1  # subtract one to make easier to compute
+                # range_len -= 1  # subtract one to make easier to compute
                 source = (source_start, source_start + range_len)
                 destination = (destination_start,
                                destination_start + range_len)
                 maps[title].append((source, destination))
 
+        # seeds = [seeds[0]]
         print(seeds)
         for map_key, map_values in maps.items():
+            # print(map_values)
             new = []
             while len(seeds) > 0:
+                # print(len(seeds), seeds)
                 start, end = seeds.pop()
                 for source, destination in map_values:
                     # print(map_key, source, destination, 'from', start, end)
                     ss, se = source
                     destination_start, destination_end = destination
 
-                    left = start < ss and end >= ss
-                    right = start <= se and end > se
-                    inner = start > ss and end < se
-                    # print('inside', inner, '| left', left, '| right', right)
-                    # print()
+                    overlap_start = max(start, ss)
+                    overlap_end = min(end, se)
 
-                    dts = destination_end - se
-                    if left:
-                        inside_part = (ss + dts, end + dts)
-                        outside_part = (start, ss)
-                        new.append(inside_part)
-                        new.append(outside_part)
-                        # print('left slice inside', inside_part, dts)
-                        # print('left slice outside', outside_part)
-                        break
-                    elif right:
-                        inside_part = (start + dts, se + dts)
-                        outside_part = (se, end)
-                        new.append(inside_part)
-                        new.append(outside_part)
-                        # print('right slice inside', inside_part, dts)
-                        # print('right slice outside', outside_part)
-                        break
-                    elif inner:
-                        after_seed = (start + dts, end + dts)
-                        # print('inner', (start, end), '+', dts, '=', after_seed)
-                        new.append(after_seed)
+                    # x = overlap_start < overlap_end
+                    # y = overlap_start > start
+                    # z = end > overlap_end
+
+                    if overlap_start < overlap_end:
+                        new.append((overlap_start - ss + destination_start,
+                                   overlap_end - ss + destination_start))
+                        if overlap_start > start:
+                            seeds.append((start, overlap_start))
+                        if end > overlap_end:
+                            seeds.append((overlap_end, end))
                         break
                 else:
                     new.append((start, end))
 
             seeds = new
-        print(seeds)
+        # print(seeds)
         return min(seeds)[0]
 
 
