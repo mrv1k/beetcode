@@ -52,7 +52,7 @@ def day5part1():
 
 
 def day5part2():
-    with open('input/example.txt', 'r') as f:
+    with open('input/5.txt', 'r') as f:
         seed_line = f.readline()
         seeds = re.findall(r'\d+', seed_line.split(": ")[1])
         seeds = list(map(lambda s: int(s), seeds))
@@ -89,59 +89,49 @@ def day5part2():
                 maps[title].append((source, destination))
 
         print(seeds)
-        seeds=[seeds[1]]
-        for initia_pair_of_seeds in seeds:
-            seeds_to_go_now = [initia_pair_of_seeds]
-            seeds_to_go_later = []
-            while len(seeds_to_go_now):
-                print('now', seeds_to_go_now)
-                cur_seed = seeds_to_go_now.pop()
-                for map_key, map_values in maps.items():
-                    for row in map_values:
-                        source, destination = row
-                        ss, se = source
-                        destination_start, destination_end = destination
+        for map_key, map_values in maps.items():
+            new = []
+            while len(seeds) > 0:
+                start, end = seeds.pop()
+                for source, destination in map_values:
+                    # print(map_key, source, destination, 'from', start, end)
+                    ss, se = source
+                    destination_start, destination_end = destination
 
-                        left = cur_seed[0] <= ss and cur_seed[1] >= ss
-                        right = cur_seed[0] <= se and cur_seed[1] >= se
-                        inner = cur_seed[0] >= ss and cur_seed[1] <= se
-                        # print(cur_seed[0], ss, cur_seed[1], se, cur_seed[1], ss)
-                        print(map_key, cur_seed, source)
-                        # print('inside', inner, '| left', left, '| right', right)
-                        # print()
+                    left = start < ss and end >= ss
+                    right = start <= se and end > se
+                    inner = start > ss and end < se
+                    # print('inside', inner, '| left', left, '| right', right)
+                    # print()
 
-                        dts = destination_end - se
-                        if left:
-                            # seeds_to_go_later.append()
-                            print('left slice')
-                            break
-                        elif right:
-                            inside_part = (cur_seed[0] + dts, se + dts)
-                            # before = (cur_seed[0], se)
-                            # print(before, '+', dts, '=', inside_part)
-                            seeds_to_go_later.append(inside_part)
-                            outside_part = (se + 1, cur_seed[1])
-                            seeds_to_go_later.append(outside_part)
-                            print('right slice inside', inside_part)
-                            print('right slice outside', outside_part)
-                            break
-                        elif inner:
-                            after_seed = (cur_seed[0] + dts, cur_seed[1] + dts)
-                            print(cur_seed, '+', dts, '=', after_seed)
-                            seeds_to_go_later.append(after_seed)
-                            break
-                        # else:
-                        #     print('else')
-                    if len(seeds_to_go_later) == 0:
-                        seeds_to_go_later.append(cur_seed)
-                    print('later', seeds_to_go_later)
-                    print()
-                    seeds_to_go_now = seeds_to_go_later
-                return
-            # min_seed = min(min_seed, path)
-            # return min_seed
-            # print('final path', path)
-        return 0
+                    dts = destination_end - se
+                    if left:
+                        inside_part = (ss + dts, end + dts)
+                        outside_part = (start, ss)
+                        new.append(inside_part)
+                        new.append(outside_part)
+                        # print('left slice inside', inside_part, dts)
+                        # print('left slice outside', outside_part)
+                        break
+                    elif right:
+                        inside_part = (start + dts, se + dts)
+                        outside_part = (se, end)
+                        new.append(inside_part)
+                        new.append(outside_part)
+                        # print('right slice inside', inside_part, dts)
+                        # print('right slice outside', outside_part)
+                        break
+                    elif inner:
+                        after_seed = (start + dts, end + dts)
+                        # print('inner', (start, end), '+', dts, '=', after_seed)
+                        new.append(after_seed)
+                        break
+                else:
+                    new.append((start, end))
+
+            seeds = new
+        print(seeds)
+        return min(seeds)[0]
 
 
 print(day5part2())
