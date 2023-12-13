@@ -32,3 +32,28 @@ def day6part1():
 
 
 print(day6part1())
+
+
+def day6part2():
+    with open('./input/6.txt', 'r') as file:
+        times = int(''.join(file.readline().split()[1:]))
+        distances = int(''.join(file.readline().split()[1:]))
+        record = [times, distances]
+        print(times, distances)
+
+        ways_to_beat = []
+
+        the_meat = 0
+        hodl = 0
+        while hodl < record[0] - 1:
+            hodl += 1
+            travel = hodl * (record[0] - hodl)
+            beat = travel > record[1]
+            if beat:
+                the_meat += 1
+        ways_to_beat.append(the_meat)
+        print(ways_to_beat)
+        return reduce(lambda x, y: x * y, ways_to_beat)
+
+
+print(day6part2())
