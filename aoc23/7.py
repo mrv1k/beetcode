@@ -5,11 +5,12 @@ T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483
-AKQJT 322
-69696 666
-JJJJJ 111
-66669 111
 """
+# AKQJT 111
+# 98765 111
+# 69696 666
+# JJJJJ 111
+# 66669 111
 
 # get: a list of hands
 # goal: order based on strength
@@ -32,24 +33,21 @@ def day7part1():
         hands, bet = line.split()
         hands_with_bets.append((hands, int(bet)))
 
-    combination_buckets = {
+    hands_buckets = {
         5: [],  # '5_of_a_kind': [],
         4: [],  # '4_of_a_kind': [],
         32: [],  # '3+2_full_house': [],
         3: [],  # '3_of_a_kind': [],
-        2: [],  # '2_pair': [],
-        1: [],  # '1_high_card': [],
+        22: [],  # '2+2_pairs': [],
+        1: [],  # '1_pair': [],
+        0: [],  # highest card
     }
-    # print(CARSD_ASC)
-    # power = CARSD_ASC.index(card)
-    # sort into 6 buckets of available combinations
+
+    # sort into 6 buckets of available hands
     for hand, bet in hands_with_bets:
         cards = list(hand)
         analysis = {}
-        # print(cards)
         for card in cards:
-            # exists = analysis.get(card)
-            # print(card, exists)
             if card not in analysis:
                 analysis[card] = 1
             else:
@@ -59,27 +57,47 @@ def day7part1():
 
             highest = values[0]
             if highest == 5:  # five of a kind
-                combination_buckets[5].append(hand)
-                continue
-
-            highest2 = values[1]
+                hands_buckets[5].append(hand)
             if highest == 4:  # four of a kind
-                combination_buckets[4].append(hand)
-            elif highest == 3:  # three
-                if highest2 == 2:  # full house
-                    combination_buckets[32].append(hand)
-                else:  # three of a kind
-                    combination_buckets[3].append(hand)
-            elif highest == 2:  # two pair
-                combination_buckets[2].append(hand)
+                hands_buckets[4].append(hand)
             else:
-                combination_buckets[1].append(hand)
+                highest2 = values[1]
+                if highest == 3:  # three
+                    if highest2 == 2:  # full house
+                        hands_buckets[32].append(hand)
+                    else:  # three of a kind
+                        hands_buckets[3].append(hand)
+                elif highest == 2:  # pair
+                    if highest2 == 2:
+                        hands_buckets[22].append(hand)
+                    else:  # one pair
+                        hands_buckets[1].append(hand)
+                else:  # highest card
+                    hands_buckets[0].append(hand)
 
-            # combination_buckets[combo].append(combo)
-            # print(analysis, 'max', values, highest, highest2)
-        # break
+    # TODO: now sort the buckets based on second ordering rule
+    # compare 1st card in each hand, if different highest card combo wins
+    # and so on so forth
+    for (combo, hands) in hands_buckets.items():
+        print(combo, hands)
+        powers = []
+        for hand in hands:
+            power = []
+            cards = list(hand)
+            for card in cards:
+                power.append(CARSD_ASC.index(card))
+            else:
+                powers.append(power)
+        print('raw', powers)
+        # sorted_power = sorted(powers, key=lambda x: print('whole', x) or True)
+        sorted_power = sorted(powers, reverse=True)
+        print('sorted', sorted_power)
+        print()
 
-    print(combination_buckets)
+    # print(CARSD_ASC)
+    # power =
+
+    # print(hands_buckets)
     return 'mek'
 
 
