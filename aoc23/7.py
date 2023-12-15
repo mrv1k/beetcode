@@ -6,6 +6,8 @@ KK677 28
 KTJJT 220
 QQQJA 483
 """
+# 69999 111
+# J9999 111
 # AKQJT 111
 # 98765 111
 # 69696 666
@@ -21,16 +23,12 @@ CARDS_DESC = ['A', 'K', 'Q', 'J', 'T', '9', '8',
 CARSD_ASC = CARDS_DESC[::-1]
 
 
-def is_five_of_a_kind(cards):
-    cards
-
-
 def day7part1():
-    # file = input.splitlines()
+    file = input.splitlines()
     # with  as file:
-    f = open('./input/7.txt', 'r')
-    file = f.read().splitlines()
-    f.close()
+    # f = open('./input/7.txt', 'r')
+    # file = f.read().splitlines()
+    # f.close()
 
     hands_with_bets = []
     for line in file:
@@ -57,32 +55,74 @@ def day7part1():
             else:
                 analysis[card] += 1
         else:
+            items = sorted(analysis.items(), key=lambda x: x[1], reverse=True)
+
+            # J cards can pretend to be whatever card is best for the purpose of
+            # determining hand type;
+            jocker_count = 0
+            for card, count in items:
+                if card == 'J':
+                    jocker_count = count
+                    break
+
+            print(jocker_count)
+            print(items)
             values = sorted(analysis.values(), reverse=True)
 
             highest = values[0]
+            # FIXME: what happens if combination is made out of jockers?
 
-            if highest == 5:  # five of a kind
+            # logic should be
+            # 5 > 4 > 32 > 3 > 22 > 1 > 0
+            if highest == 5:  # five of a kind # is impossible without a jocker
                 hands_buckets[5].append((hand, bet))
             elif highest == 4:  # four of a kind
-                hands_buckets[4].append((hand, bet))
+                if jocker_count == 1:  # 4 + J = 5
+                    hands_buckets[5].append((hand, bet))
+                else:
+                    hands_buckets[4].append((hand, bet))
             else:
                 highest2 = values[1]
                 if highest == 3:  # three
-                    if highest2 == 2:  # full house
+                    if jocker_count == 2:  # 3 + JJ = 5
+                        hands_buckets[5].append((hand, bet))
+                    elif jocker_count == 1:  # 3 + J = 4
+                        hands_buckets[4].append((hand, bet))
+                    elif highest2 == 2:  # full house
                         hands_buckets[32].append((hand, bet))
                     else:  # three of a kind
                         hands_buckets[3].append((hand, bet))
                 elif highest == 2:  # pair
+                    if jocker_count == 3:  # 2 + JJJ = 5
+                        hands_buckets[5].append((hand, bet))
+                    if jocker_count == 2:  # 2 + JJ = 4
+                        hands_buckets[4].append((hand, bet))
+                    if jocker_count == 1:  # 2 + J = 3
+                        hands_buckets[3].append((hand, bet))
                     if highest2 == 2:
-                        hands_buckets[22].append((hand, bet))
+                        if jocker_count == 1:  # 2 + 2 + J = 32
+                            hands_buckets[32].append((hand, bet))
+                        else:
+                            hands_buckets[22].append((hand, bet))
                     else:  # one pair
+                        if jocker_count == 4:  # 0 + JJJJ = 5
+                            hands_buckets[5].append((hand, bet))
+                        if jocker_count == 3:  # 0 + JJJ = 4
+                            hands_buckets[5].append((hand, bet))
+                        if jocker_count == 2:  # 0 + JJ = 3
+                            hands_buckets[4].append((hand, bet))
+                        if jocker_count == 1:  # 0 + J = 2
+                            hands_buckets[3].append((hand, bet))
+
                         hands_buckets[1].append((hand, bet))
                 else:  # highest card
                     hands_buckets[0].append((hand, bet))
 
-    # TODO: now sort the buckets based on second ordering rule
+    print(hands_buckets)
+    # now sort the buckets based on second ordering rule
     # compare 1st card in each hand, if different highest card combo wins
     # and so on so forth
+
     sorted_buckets = {}
 
     for (combo, hands_with_bets) in hands_buckets.items():
@@ -98,7 +138,7 @@ def day7part1():
         sorted_powers = sorted(powers, key=lambda x: x[0])
         sorted_buckets[combo] = sorted_powers
         # print('raw', powers)
-        # print('sorted', sorted_power)
+        # print('sorted', sorted_buckets)
         # print()
 
     store_served = 0
