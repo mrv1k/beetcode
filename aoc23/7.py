@@ -6,6 +6,13 @@ KK677 28
 KTJJT 220
 QQQJA 483
 """
+
+input = """\
+JJ234 1
+2233J 1
+224JJ 1
+"""
+# J2345 1
 # 69999 111
 # J9999 111
 # AKQJT 111
@@ -20,7 +27,11 @@ QQQJA 483
 
 CARDS_DESC = ['A', 'K', 'Q', 'J', 'T', '9', '8',
               '7', '6', '5', '4', '3', '2', '1', '0']
-CARSD_ASC = CARDS_DESC[::-1]
+CARDS_ASC = CARDS_DESC[::-1]
+
+CARDS_ASC_JOKER_WEAK = CARDS_ASC.copy()
+CARDS_ASC_JOKER_WEAK.remove('J')
+CARDS_ASC_JOKER_WEAK[1] = 'J'
 
 
 def day7part1():
@@ -57,17 +68,17 @@ def day7part1():
         else:
             items = sorted(analysis.items(), key=lambda x: x[1], reverse=True)
 
-            # J cards can pretend to be whatever card is best for the purpose of
-            # determining hand type;
+            # J cards can pretend to be whatever card is best for the purpose
+            # of determining hand type;
             jocker_count = 0
             for card, count in items:
                 if card == 'J':
                     jocker_count = count
                     break
 
-            print(jocker_count)
-            print(items)
+            # print(jocker_count)
             values = sorted(analysis.values(), reverse=True)
+            print(items)
 
             highest = values[0]
             # FIXME: what happens if combination is made out of jockers?
@@ -93,30 +104,47 @@ def day7part1():
                     else:  # three of a kind
                         hands_buckets[3].append((hand, bet))
                 elif highest == 2:  # pair
-                    if jocker_count == 3:  # 2 + JJJ = 5
-                        hands_buckets[5].append((hand, bet))
-                    if jocker_count == 2:  # 2 + JJ = 4
-                        hands_buckets[4].append((hand, bet))
+                    print('h2', analysis, hand, values, jocker_count)
+
+                    # up until the point, jocker_count and card count would differ
+                    # thus, we knew that highest card wasn't Jocker
+                    # now we have to make sure it isn't
+                    # an edge case could be: higest card is JJ, plus we count JJ
+                    # for jocker_count, thus we get 4 out of 2 J's
+                    jocker_is_highest = False
+                    jocker_is_highest2 = False
+                    j_highest = ('J', highest)
+                    j_highest2 = ('J', highest2)
+                    if j_highest in items:
+                        jocker_is_highest = items.index(
+                            ('J', highest)) == 0 or items.index(('J', highest)) == 1
+
+                    if j_highest2 in items:
+                        jocker_is_highest2 = items.index(
+                            ('J', highest2)) == 0 or items.index(('J', highest2)) == 1
+                    print(jocker_is_highest, jocker_is_highest2)
+
                     if jocker_count == 1:  # 2 + J = 3
                         hands_buckets[3].append((hand, bet))
-                    if highest2 == 2:
+                    elif highest2 == 2:
+                        if (jocker_is_highest or jocker_is_highest2) and jocker_count == 2:
+                            print('suk4')
+                            hands_buckets[4].append((hand, bet))
+
                         if jocker_count == 1:  # 2 + 2 + J = 32
                             hands_buckets[32].append((hand, bet))
                         else:
                             hands_buckets[22].append((hand, bet))
                     else:  # one pair
-                        if jocker_count == 4:  # 0 + JJJJ = 5
-                            hands_buckets[5].append((hand, bet))
-                        if jocker_count == 3:  # 0 + JJJ = 4
-                            hands_buckets[5].append((hand, bet))
-                        if jocker_count == 2:  # 0 + JJ = 3
-                            hands_buckets[4].append((hand, bet))
-                        if jocker_count == 1:  # 0 + J = 2
+                        if jocker_count == 1:  # 1 + J = 2
                             hands_buckets[3].append((hand, bet))
-
-                        hands_buckets[1].append((hand, bet))
+                        else:
+                            hands_buckets[1].append((hand, bet))
                 else:  # highest card
-                    hands_buckets[0].append((hand, bet))
+                    if jocker_count == 1:  # 0 + J = 2
+                        hands_buckets[1].append((hand, bet))
+                    else:
+                        hands_buckets[0].append((hand, bet))
 
     print(hands_buckets)
     # now sort the buckets based on second ordering rule
@@ -125,6 +153,9 @@ def day7part1():
 
     sorted_buckets = {}
 
+    # J cards are now the weakest individual cards, weaker even than 2
+    # J cards can pretend to be whatever card is best for the purpose of
+    # determining hand type;
     for (combo, hands_with_bets) in hands_buckets.items():
         # print(combo, hands_with_bets)
         powers = []
@@ -132,7 +163,7 @@ def day7part1():
             power = []
             cards = list(hand)
             for card in cards:
-                power.append(CARSD_ASC.index(card))
+                power.append(CARDS_ASC.index(card))
             else:
                 powers.append((power, bet))
         sorted_powers = sorted(powers, key=lambda x: x[0])
