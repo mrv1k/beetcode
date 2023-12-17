@@ -7,18 +7,18 @@ KTJJT 220
 QQQJA 483
 """
 
-# 2345A 1
-# Q2KJJ 13
-# Q2Q2Q 19
-# T3T3J 17
-# T3Q33 11
-# 2345J 3
-# J345A 2
-# 32T3K 5
-# T55J5 29
-# KK677 7
-# KTJJT 34
 better_input_from_reddit ="""\
+2345A 1
+Q2KJJ 13
+Q2Q2Q 19
+T3T3J 17
+T3Q33 11
+2345J 3
+J345A 2
+32T3K 5
+T55J5 29
+KK677 7
+KTJJT 34
 QQQJA 31
 JJJJJ 37
 JAAAA 43
@@ -27,8 +27,8 @@ AAAAA 61
 2AAAA 23
 2JJJJ 53
 JJJJ2 41
-JJJJJ 111
 """
+# JJJJJ 111
 
 # get: a list of hands
 # goal: order based on strength
@@ -46,18 +46,15 @@ print(CARDS_ASC_JOKER_WEAK)
 
 def day7part1():
     # file = "JJJ34 666".splitlines()
-
-    file = better_input_from_reddit.splitlines()
+    # file = better_input_from_reddit.splitlines()
     # file = input.splitlines()
     # with  as file:
-    # f = open('./input/7.txt', 'r')
-    # file = f.read().splitlines()
-    # f.close()
-
+    f = open('./input/7.txt', 'r')
+    file = f.read().splitlines()
+    f.close()
 
     hands_with_bets = []
     for line in file:
-        print(line)
         hands, bet = line.split()
         hands_with_bets.append((hands, int(bet)))
 
@@ -93,40 +90,41 @@ def day7part1():
 
             # handle what happens if combination is made out of jockers?
             start = 1 if (items[0][0] == 'J' and len(items) > 1) else 0
-            highest = items[start][1]
+            aCard = items[start][1]
+            # print(items)
 
             # logic should be
             # 5 > 4 > 32 > 3 > 22 > 1 > 0
-            if highest == 5:  # five of a kind # is impossible without a jocker
+            if aCard == 5:  # five of a kind # is impossible without a jocker
                 hands_buckets[5].append((hand, bet))
-            elif highest == 4:  # four of a kind
+            elif aCard == 4:  # four of a kind
                 # QJJJJ 8888J
                 if jocker_count >= 1:  # 4 + J = 5
                     hands_buckets[5].append((hand, bet))
                 else:
                     hands_buckets[4].append((hand, bet))
             else:
-                highest2 = 0
                 start2 = -1
                 if len(items) > start + 1:
-                    start2 = start + 1
-                    highest2 = start2 + 1 if items[start + 1][0] == 'J' else start2
-                    print(start, start2, items[start + 1][0] == 'J')
+                    start2 = start + 2 if items[start + 1][0] == 'J' else start + 1
 
-                # highest2 = items[start2][1]
-                # start2 = 2 if (items[start + 1][0] == 'J' and ) else 0
+                try:
+                    bCard = items[start2][1] if start2 != -1 else 0
+                except:
+                    print('broke, whateves. just swallow and move on', items)
+                # print(items[start], items[start2], '|', start, start2)
+                # print()
 
-                print('suk', items, items[start], items[start2])
-                if highest == 3:  # three
+                if aCard == 3:  # three
                     if jocker_count == 2:  # 3 + JJ = 5
                         hands_buckets[5].append((hand, bet))
                     elif jocker_count == 1:  # 3 + J = 4
                         hands_buckets[4].append((hand, bet))
-                    elif highest2 == 2:  # full house
+                    elif bCard == 2:  # full house
                         hands_buckets[32].append((hand, bet))
                     else:  # three of a kind
                         hands_buckets[3].append((hand, bet))
-                elif highest == 2:  # pair
+                elif aCard == 2:  # pair
                     # print('h2', analysis, hand, values, jocker_count)
 
                     # up until the point, jocker_count and card count would differ
@@ -134,24 +132,10 @@ def day7part1():
                     # now we have to make sure it isn't
                     # an edge case could be: higest card is JJ, plus we count JJ
                     # for jocker_count, thus we get 4 out of 2 J's
-                    jocker_is_highest = False
-                    jocker_is_highest2 = False
-                    j_highest = ('J', highest)
-                    j_highest2 = ('J', highest2)
-                    if j_highest in items:
-                        jocker_is_highest = items.index(
-                            ('J', highest)) == 0 or items.index(('J', highest)) == 1
 
-                    if j_highest2 in items:
-                        jocker_is_highest2 = items.index(
-                            ('J', highest2)) == 0 or items.index(('J', highest2)) == 1
-
-                    one_combo_of_is_jocker = (jocker_is_highest or jocker_is_highest2)
-                    # print(jocker_is_highest, jocker_is_highest2)
-
-                    if highest2 == 2:
+                    if bCard == 2:
                         # JJQQA
-                        if one_combo_of_is_jocker and jocker_count == 2:
+                        if jocker_count == 2:
                             hands_buckets[4].append((hand, bet))
                         # AAQQJ
                         elif jocker_count == 1:  # 2 + 2 + J = 32
@@ -160,7 +144,9 @@ def day7part1():
                             hands_buckets[22].append((hand, bet))
                     else:  # one pair
                         # AAJ23 / 1 + J = 3; 0 + JJ = 3
-                        if jocker_count == 2 or jocker_count == 1:
+                        if jocker_count == 2:
+                            hands_buckets[4].append((hand, bet))
+                        elif jocker_count == 1:
                             hands_buckets[3].append((hand, bet))
                         else:
                             hands_buckets[1].append((hand, bet))
@@ -171,6 +157,8 @@ def day7part1():
                         hands_buckets[3].append((hand, bet))
                     elif jocker_count == 3:
                         hands_buckets[4].append((hand, bet))
+                    elif jocker_count == 4:
+                        hands_buckets[5].append((hand, bet))
                     else:
                         hands_buckets[0].append((hand, bet))
 
@@ -204,7 +192,7 @@ def day7part1():
     order_number = 1
 
     for combo, buckets in sorted_buckets.items():
-        print(combo, buckets)
+        # print(combo, buckets)
         for kfc in buckets:
             chicken, wings, _ = kfc
             fullfilled_order = wings * order_number
